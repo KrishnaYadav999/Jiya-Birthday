@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import confetti from "canvas-confetti";
-import { Heart, RotateCcw, Sparkles } from "lucide-react";
+import { RotateCcw, Sparkles } from "lucide-react";
 
 const cards = [
   { image: "love", title: "How much? This much.", alt: "A cute cat beside a pink and purple love pie chart" },
@@ -14,21 +14,30 @@ const cards = [
 ];
 
 const questions = [
-  ["Jiya, birthday girl wali biggest smile dogi?", "Bas, isi smile ke liye toh yeh sab banaya hai. ♡"],
-  ["Aaj thoda extra pamper hone ke liye ready ho?", "Birthday girl deserves the royal treatment!"],
-  ["Mere diye hue flowers accept karogi?", "Cherry blossoms, lilies aur saara pyaar — tumhare liye."],
-  ["Ek cherry blossom walk mere saath karogi?", "Pink flowers, tum, aur ek perfect little moment."],
-  ["Lilies ke bouquet ke saath ek cute si photo logi?", "My favourite girl with her favourite flowers. Perfect."],
-  ["Mere saath cake ka pehla bite share karogi?", "Sabse sweet bite, sabse sweet person ke saath."],
-  ["Birthday hug ke liye apni arms open karogi?", "Sending the warmest, longest virtual hug. ♡"],
-  ["Meri silly baaton par aise hi hasti rahogi?", "Tumhari laugh meri favourite sound hai."],
-  ["Aaj apni favourite dessert choose karogi?", "Aaj tumhari choice, tumhari happiness, tumhara day."],
-  ["Ek cute cat jaisa pyaar bhara flower logi?", "This little kitty has excellent taste — it picked you!"],
-  ["Apne dreams ke liye ek bada sa wish karogi?", "Dream big, Jiya. I’ll always be cheering for you."],
-  ["Mere saath aur cute memories banane ke liye ready ho?", "A thousand little moments, aur har ek mein tum."],
-  ["Yaad rakhogi ki tum kitni special ho?", "Just as you are. Today, tomorrow, always."],
-  ["Mere favourite person ka title rakhogi?", "Reserved for Jiya. No expiry date. ♡"],
-  ["Apne happiest birthday chapter ko welcome karogi?", "Then here’s to you, your dreams, and all the happiness ahead!"],
+  { text: "Kya Krishna aapko pareshan karta hai?", image: "cat", options: [
+    { label: "Yes", message: "Huhhh… itna bhi pareshan karta hoon kya? 🥺", image: "crying-cat" },
+    { label: "No", message: "Hehe, mujhe pata tha! Tum toh meri favourite ho. ♡", image: "happy-cat" },
+  ] },
+  { text: "Fish pasand hai ki Krishna?", image: "love", options: [
+    { label: "K · Krishna", message: "Krishna wins! Ab toh dil garden garden ho gaya. ♡", image: "happy-cat" },
+    { label: "F · Fish", message: "Fish se haar gaya… chalo, second favourite toh hoon na? 🥺", image: "crying-cat" },
+  ] },
+  { text: "Kya mujhe maarne ka mann karta hai?", image: "heart", options: [
+    { label: "Yes", message: "Arre meri jaan, bas pyaar wali daant chalegi! 🙈", image: "crying-cat" },
+    { label: "No", message: "Good! Toh ek virtual hug pakka. ♡", image: "happy-cat" },
+  ] },
+  { text: "Aaj Boyfriend Day hai… kisi ne toh wish bhi nahi kiya? Huhhhh!", image: "crying-cat", options: [
+    { label: "Happy Boyfriend Day, Krishna! ♡", message: "Ab aayi na meri favourite wish. Thank you, meri Jiya! ♡", image: "happy-cat" },
+    { label: "Awww, abhi wish karti hoon!", message: "Main yahin hoon, apni cutest wish ka wait karte hue. 🙈", image: "shy-cat" },
+  ] },
+  { text: "“Mai choodi huna” aisa baar-baar kaun bolta hai?", image: "shy-cat", options: [
+    { label: "Tu", message: "Achhaaa, main? Yeh shy face sab bata raha hai. 🙈", image: "shy-cat" },
+    { label: "Mai", message: "Hehe, confession mil gaya! Meri cutie. ♡", image: "shy-cat" },
+  ] },
+  { text: "Jiya · जिया · ジヤ… will you be mine? ♡", image: "bouquet", options: [
+    { label: "Yes ♡", message: "My favourite yes, from my favourite person. ♡", image: "happy-cat" },
+    { label: "Yes, always! ✨", message: "Always sounds beautiful with you. ♡", image: "shy-cat" },
+  ] },
 ];
 
 function burst(count: number) {
@@ -47,6 +56,9 @@ export default function Surprises({ onVideoPlay }: { onVideoPlay: () => void }) 
   const next = useRef<HTMLButtonElement>(null);
   const interacted = useRef(false);
   const finished = step === questions.length;
+  const current = questions[step];
+  const chosen = current?.options.find(option => option.label === selection);
+  const gameImage = chosen?.image ?? current?.image ?? "bouquet";
 
   useEffect(() => {
     if (!interacted.current) return;
@@ -85,13 +97,13 @@ export default function Surprises({ onVideoPlay }: { onVideoPlay: () => void }) 
       </figure>)}</div>
     </section>
     <section className="yes-section section-pad" id="yes-game">
-      <div className="intro reveal"><p className="eyebrow">JUST A LITTLE BIRTHDAY FLIRTING</p><h2>15 questions.<br/><em>So many little yeses.</em></h2><p>Dono options yes hain — bas thoda sa birthday fun. ♡</p></div>
+      <div className="intro reveal"><p className="eyebrow">JUST A LITTLE BIRTHDAY FLIRTING</p><h2>Bas tum, main…<br/><em>aur thodi si masti.</em></h2><p>जिया · ジヤ, in sawaalon ke jawaab toh do. ♡</p></div>
       <div className="question-shell reveal">
-        <div className="question-progress"><span>{finished ? "15 little yeses, one happy heart" : `Question ${step + 1} of 15`}</span><span>{finished ? 15 : step} / 15 answered</span></div>
-        <progress aria-label="Birthday questions completed" value={finished ? 15 : step} max={15}/>
+        <div className="question-progress"><span>{finished ? "A little masti, a lot of love" : `Question ${step + 1} of ${questions.length}`}</span><span>{finished ? questions.length : step} / {questions.length} answered</span></div>
+        <progress aria-label="Birthday questions completed" value={finished ? questions.length : step} max={questions.length}/>
         <div className="question-panel" ref={panel}>
-          {finished ? <><Sparkles className="finish-sparkle" size={36}/><h3 ref={heading} tabIndex={-1}>You just made my heart<br/>15 times happier.</h3><p>Happy Birthday, Jiya. Har yes ke saath ek aur reason to smile. Aaj ka din tumhari tarah beautiful ho.</p><img className="game-image" src="/surprises/bouquet.jpg" alt="A special bouquet for the birthday girl" width={736} height={721}/><p className="script">All the flowers. All the love. All for you.</p><div className="game-actions"><a className="primary" href="#your-video">Your next little surprise</a><button className="restart" onClick={() => { interacted.current = true; setStep(0); setAnswered(false); }}><RotateCcw size={16}/>Play again</button></div></>
-          : <><img className="game-image" src={`/surprises/${cards[Math.floor(step / 3)].image}.jpg`} alt={cards[Math.floor(step / 3)].alt} width={736} height={736}/><h3 ref={heading} tabIndex={-1}>{questions[step][0]}</h3><div className="answer-options"><button className="primary" onClick={() => answer("Yes ♡")} disabled={answered}><Heart size={17}/>Yes ♡</button><button className="yes-extra" onClick={() => answer("Yes, bilkul! ✨")} disabled={answered}>Yes, bilkul! ✨</button></div><div className="answer-response" aria-live="polite">{answered ? <><p className="chosen">{selection}</p><p>{questions[step][1]}</p><button className="next-question" ref={next} onClick={advance}>{step === 14 ? "Open my birthday surprise" : "Next little question"}</button></> : <p className="game-hint">A little yes, a little smile, a little more love.</p>}</div></>}
+          {finished ? <><Sparkles className="finish-sparkle" size={36}/><h3 ref={heading} tabIndex={-1}>My favourite person.<br/>My favourite yes.</h3><p>Happy Birthday, Jiya · जिया · ジヤ. Thodi nok-jhok, bahut saara pyaar — aur end mein mera favourite yes. ♡</p><img className="game-image" src="/surprises/bouquet.jpg" alt="A special bouquet for the birthday girl" width={736} height={721}/><p className="script">All the flowers. All the love. All for you.</p><div className="game-actions"><a className="primary" href="#your-video">Your next little surprise</a><button className="restart" onClick={() => { interacted.current = true; setStep(0); setAnswered(false); setSelection(""); }}><RotateCcw size={16}/>Play again</button></div></>
+          : <><img className="game-image" key={gameImage} src={`/surprises/${gameImage}.jpg`} alt={gameImage === "crying-cat" ? "A little crying cat reaction" : gameImage === "happy-cat" ? "A happy cat surrounded by hearts" : gameImage === "shy-cat" ? "A shy kitten peeking around a door with hearts" : "A little picture full of love"} width={736} height={736}/><h3 ref={heading} tabIndex={-1}>{current.text}</h3><div className="answer-options">{current.options.map((option,i) => <button key={option.label} className={i === 0 ? "primary" : "yes-extra"} onClick={() => answer(option.label)} disabled={answered}>{option.label}</button>)}</div><div className="answer-response" aria-live="polite">{answered ? <><p className="chosen">{selection}</p><p>{chosen?.message}</p><button className="next-question" ref={next} onClick={advance}>{step === questions.length - 1 ? "Open my birthday surprise" : "Next little question"}</button></> : <p className="game-hint">Apna answer choose karo. ♡</p>}</div></>}
         </div>
       </div>
     </section>
