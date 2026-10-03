@@ -26,19 +26,47 @@ const questions = [
     { label: "Yes", message: "Arre meri jaan, bas pyaar wali daant chalegi! 🙈", image: "crying-cat" },
     { label: "No", message: "Good! Toh ek virtual hug pakka. ♡", image: "happy-cat" },
   ] },
-  { text: "Aaj Boyfriend Day hai… kisi ne toh wish bhi nahi kiya? Huhhhh!", image: "crying-cat", options: [
-    { label: "Happy Boyfriend Day, Krishna! ♡", message: "Ab aayi na meri favourite wish. Thank you, meri Jiya! ♡", image: "happy-cat" },
-    { label: "Awww, abhi wish karti hoon!", message: "Main yahin hoon, apni cutest wish ka wait karte hue. 🙈", image: "shy-cat" },
+  { text: "Aaj Boyfriend Day hai… wish jaan-bujhkar nahi kiya ya sach mein bhool gayi? Huhhhh!", image: "crying-cat", options: [
+    { label: "Jaan-bujhkar nahi bola 🙈", message: "Achhaaa, mujhe tease kar rahi thi! Ab ek cute si wish toh banti hai. ♡", image: "shy-cat" },
+    { label: "Sach mein bhool gayi 🥺", message: "Koi baat nahi, meri jaan. Tumhari late wish bhi mere liye special hai. ♡", image: "crying-cat" },
   ] },
   { text: "“Mai choodi huna” aisa baar-baar kaun bolta hai?", image: "shy-cat", options: [
     { label: "Tu", message: "Achhaaa, main? Yeh shy face sab bata raha hai. 🙈", image: "shy-cat" },
     { label: "Mai", message: "Hehe, confession mil gaya! Meri cutie. ♡", image: "shy-cat" },
+  ] },
+  { text: "Aaj aapka Accounts ka paper hai! Best of luck, meri…? ♡", image: "accounts-maths", options: [
+    { label: "Best of luck, Rasmalai! ♡", message: "Meri Rasmalai, calmly paper likhna. Tumne jo padha hai, us par trust karo. You’ve got this! ♡", image: "accounts-maths" },
+    { label: "Best of luck, Kaju Katli! ✨", message: "Meri Kaju Katli, ek-ek question aaram se karna. Krishna tumhare liye cheer kar raha hai! ♡", image: "accounts-study" },
   ] },
   { text: "Jiya · जिया · ジヤ… will you be mine? ♡", image: "bouquet", options: [
     { label: "Yes ♡", message: "My favourite yes, from my favourite person. ♡", image: "happy-cat" },
     { label: "Yes, always! ✨", message: "Always sounds beautiful with you. ♡", image: "shy-cat" },
   ] },
 ];
+
+const videos = [
+  { file: "for-jiya", title: "A little love, on repeat", label: "The first special video for Jiya" },
+  { file: "another-little-love", title: "One more reason to smile", label: "Another special video for Jiya" },
+];
+
+function LoveVideo({ video, onAudiblePlay }: { video: typeof videos[number]; onAudiblePlay: () => void }) {
+  const [failed, setFailed] = useState(false);
+  function handleAudio(element: HTMLVideoElement) {
+    if (element.muted || element.paused) return;
+    onAudiblePlay();
+    element.closest(".video-grid")?.querySelectorAll("video").forEach(other => {
+      if (other !== element && !other.muted) other.muted = true;
+    });
+  }
+  return <figure className="video-card reveal"><div className="video-frame">
+    <video src={`/surprises/${video.file}.mp4`} controls autoPlay muted loop playsInline preload="auto" aria-label={video.label}
+      onPlay={event => handleAudio(event.currentTarget)} onVolumeChange={event => handleAudio(event.currentTarget)} onError={() => setFailed(true)}>
+      Your browser does not support this video.
+    </video>
+  </div><figcaption>{video.title} <span>♡</span></figcaption>
+    <p className="video-help">{failed ? <span role="alert">Video yahan play nahi ho paaya. </span> : ""}<a href={`/surprises/${video.file}.mp4`} download>Keep this little video</a></p>
+  </figure>;
+}
 
 function burst(count: number) {
   if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -50,7 +78,6 @@ export default function Surprises({ onVideoPlay }: { onVideoPlay: () => void }) 
   const [step, setStep] = useState(0);
   const [answered, setAnswered] = useState(false);
   const [selection, setSelection] = useState("");
-  const [videoError, setVideoError] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const next = useRef<HTMLButtonElement>(null);
@@ -103,10 +130,11 @@ export default function Surprises({ onVideoPlay }: { onVideoPlay: () => void }) 
         <progress aria-label="Birthday questions completed" value={finished ? questions.length : step} max={questions.length}/>
         <div className="question-panel" ref={panel}>
           {finished ? <><Sparkles className="finish-sparkle" size={36}/><h3 ref={heading} tabIndex={-1}>My favourite person.<br/>My favourite yes.</h3><p>Happy Birthday, Jiya · जिया · ジヤ. Thodi nok-jhok, bahut saara pyaar — aur end mein mera favourite yes. ♡</p><img className="game-image" src="/surprises/bouquet.jpg" alt="A special bouquet for the birthday girl" width={736} height={721}/><p className="script">All the flowers. All the love. All for you.</p><div className="game-actions"><a className="primary" href="#your-video">Your next little surprise</a><button className="restart" onClick={() => { interacted.current = true; setStep(0); setAnswered(false); setSelection(""); }}><RotateCcw size={16}/>Play again</button></div></>
-          : <><img className="game-image" key={gameImage} src={`/surprises/${gameImage}.jpg`} alt={gameImage === "crying-cat" ? "A little crying cat reaction" : gameImage === "happy-cat" ? "A happy cat surrounded by hearts" : gameImage === "shy-cat" ? "A shy kitten peeking around a door with hearts" : "A little picture full of love"} width={736} height={736}/><h3 ref={heading} tabIndex={-1}>{current.text}</h3><div className="answer-options">{current.options.map((option,i) => <button key={option.label} className={i === 0 ? "primary" : "yes-extra"} onClick={() => answer(option.label)} disabled={answered}>{option.label}</button>)}</div><div className="answer-response" aria-live="polite">{answered ? <><p className="chosen">{selection}</p><p>{chosen?.message}</p><button className="next-question" ref={next} onClick={advance}>{step === questions.length - 1 ? "Open my birthday surprise" : "Next little question"}</button></> : <p className="game-hint">Apna answer choose karo. ♡</p>}</div></>}
+          : <><img className="game-image" key={gameImage} src={`/surprises/${gameImage}.jpg`} alt={gameImage === "crying-cat" ? "A little crying cat reaction" : gameImage === "happy-cat" ? "A happy cat surrounded by hearts" : gameImage === "shy-cat" ? "A shy kitten peeking around a door with hearts" : gameImage === "accounts-maths" ? "A confused cat surrounded by mathematical formulas" : gameImage === "accounts-study" ? "A little cat studying with a helping hand" : "A little picture full of love"} width={736} height={736}/><h3 ref={heading} tabIndex={-1}>{current.text}</h3><div className="answer-options">{current.options.map((option,i) => <button key={option.label} className={i === 0 ? "primary" : "yes-extra"} onClick={() => answer(option.label)} disabled={answered}>{option.label}</button>)}</div><div className="answer-response" aria-live="polite">{answered ? <><p className="chosen">{selection}</p><p>{chosen?.message}</p><button className="next-question" ref={next} onClick={advance}>{step === questions.length - 1 ? "Open my birthday surprise" : "Next little question"}</button></> : <p className="game-hint">Apna answer choose karo. ♡</p>}</div></>}
         </div>
       </div>
     </section>
-    <section className="video-section section-pad" id="your-video"><div className="intro reveal"><p className="eyebrow">ONE MORE THING, BIRTHDAY GIRL</p><h2>A little moment.<br/><em>Just for you.</em></h2><p>Press play. This one comes with love.</p></div><div className="video-frame reveal"><video controls playsInline preload="metadata" aria-label="A special video for Jiya" onPlay={onVideoPlay} onError={() => setVideoError(true)}><source src="/surprises/for-jiya.mp4" type="video/mp4"/>Your browser does not support this video.</video></div>{videoError ? <p role="alert" className="video-help">Video yahan play nahi ho paaya. <a href="/surprises/for-jiya.mp4" download>Video download karke dekho.</a></p> : <p className="video-help">Made for your smile. <a href="/surprises/for-jiya.mp4" download>Keep this little video</a></p>}</section>
+    <section className="video-section section-pad" id="your-video"><div className="intro reveal"><p className="eyebrow">TWO LITTLE MOMENTS, JUST FOR YOU</p><h2>A little love.<br/><em>On repeat.</em></h2><p>Sound chahiye? Video ke speaker par tap karo. ♡</p></div><div className="video-grid">{videos.map(video => <LoveVideo key={video.file} video={video} onAudiblePlay={onVideoPlay}/>)}</div></section>
   </>;
 }
+
